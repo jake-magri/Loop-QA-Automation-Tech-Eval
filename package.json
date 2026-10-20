@@ -1,6 +1,7 @@
 {
   "name": "loop-qa-automation-tech-eval",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {},
@@ -19,5 +20,8 @@
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.8"
   }
 }
