@@ -1,9 +1,10 @@
-
 # Loop QA Automation Technical Evaluation
 
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?logo=playwright&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+
+![Tests](https://img.shields.io/badge/Tests-6%2F6%20Passed-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)
 
 ## Overview
 
@@ -13,6 +14,8 @@ Test cases are driven by external JSON data, allowing task titles, statuses, app
 
 ## Table of Contents
 
+- [Overview](#overview)
+- [Test Results](#test-results)
 - [Video Walkthrough](#video-walkthrough)
 - [Features](#features)
 - [Technology Stack](#technology-stack)
@@ -23,12 +26,21 @@ Test cases are driven by external JSON data, allowing task titles, statuses, app
 - [Design Decisions](#design-decisions)
 - [License](#license)
 
+## Test Results
+
+**Latest local test run: 6 passed, 0 failed.**
+
+| Result | Count |
+|:---|---:|
+| ✅ Passed | 6 |
+| ❌ Failed | 0 |
+| **Total** | **6** |
+
 ## Video Walkthrough
 
-The video below demonstrates the automated test suite, data-driven test
-structure, locator decisions, and execution results.
+The video walkthrough demonstrates the test suite structure, JSON-driven test data, locator decisions, and overall automation approach.
 
-![](github will render webplayer)
+https://github.com/user-attachments/assets/4c31eafd-813b-495d-81c3-bd6a33bcc1fd
 
 ## Features
 
@@ -50,18 +62,23 @@ structure, locator decisions, and execution results.
 
 ## Project Structure
 
-```text
-Loop-QA-Automation-Tech-Eval/
-├── tests/
-│   └── example.spec.ts
-├── test-data/
-│   └── tasks.json
-├── playwright.config.ts
-├── package.json
-├── package-lock.json
-├── .gitignore
-└── README.md
-```
+    Loop-QA-Automation-Tech-Eval/
+    ├── docs/
+    │   └── video/
+    │       └── Qa-Automation-Walkthrough.mp4
+    ├── node_modules/
+    ├── playwright-report/
+    ├── test-data/
+    │   └── tasks.json
+    ├── test-results/
+    ├── tests/
+    │   └── example.spec.ts
+    ├── .env
+    ├── .gitignore
+    ├── package-lock.json
+    ├── package.json
+    ├── playwright.config.ts
+    └── README.md
 
 ## Getting Started
 
@@ -75,21 +92,17 @@ Loop-QA-Automation-Tech-Eval/
 
 Clone the repository and install dependencies:
 
-```bash
-git clone git@github.com:jake-magri/Loop-QA-Automation-Tech-Eval.git
-cd Loop-QA-Automation-Tech-Eval
-npm install
-npx playwright install
-```
+    git clone git@github.com:jake-magri/Loop-QA-Automation-Tech-Eval.git
+    cd Loop-QA-Automation-Tech-Eval
+    npm install
+    npx playwright install
 
 ### Environment Configuration
 
 Create a `.env` file in the project root:
 
-```dotenv
-DEMO_USERNAME=your_username
-DEMO_PASSWORD=your_password
-```
+    DEMO_USERNAME=your_username
+    DEMO_PASSWORD=your_password
 
 Replace the placeholder values with your authorized assessment credentials.
 
@@ -99,21 +112,15 @@ Replace the placeholder values with your authorized assessment credentials.
 
 Run the complete test suite:
 
-```bash
-npx playwright test
-```
+    npx playwright test
 
 Run tests with a visible browser:
 
-```bash
-npx playwright test tests/example.spec.ts --headed
-```
+    npx playwright test tests/example.spec.ts --headed
 
 View the HTML report:
 
-```bash
-npx playwright show-report
-```
+    npx playwright show-report
 
 ## Test Coverage
 
@@ -134,8 +141,6 @@ Each test verifies that:
 2. The expected application view is selected.
 3. The task appears in its expected status column.
 4. Every expected tag is visible on the corresponding task card.
-
-**Latest local test run:** 6 passed, 0 failed.
 
 ## Design Decisions
 
