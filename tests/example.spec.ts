@@ -1,4 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const tasks = require('../test-data/tasks.json') as {
+  application: string;
+  title: string;
+  status: string;
+  tags: string[];
+}[];
 
 const username = process.env.DEMO_USERNAME;
 const password = process.env.DEMO_PASSWORD;
@@ -9,91 +18,72 @@ if (!username || !password) {
   );
 }
 
-// test('has title', async ({ page }) => {
-//   await page.goto('https://playwright.dev/');
+for (const task of tasks) {
+  test(`verify "${task.title}" in ${task.status}`, async ({ page }) => {
+    await page.goto('https://create-asana-like-pr-39y5.bolt.host/');
 
-//   // Expect a title "to contain" a substring.
-//   await expect(page).toHaveTitle(/Playwright/);
-// });
+    await expect(
+      page.getByRole('button', { name: 'Sign in' })
+    ).toBeVisible();
 
-// test('get started link', async ({ page }) => {
-//   await page.goto('https://playwright.dev/');
+    await page.getByRole('textbox', { name: 'Username' }).fill(username);
+    await page.getByRole('textbox', { name: 'Password' }).fill(password);
 
-//   // Click the get started link.
-//   await page.getByRole('link', { name: 'Get started' }).click();
+    await page.getByRole('button', { name: 'Sign in' }).click();
 
-//   // Expects page to have a heading with the name of Installation.
-//   await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
-// });
+    // Tradeoff: Codegen exposed "Mobile Application Native"; use the more stable
+    // "Mobile Application" name to avoid coupling to the subheading, assuming uniqueness.
+    if (task.application === 'Mobile Application') {
+      await page.getByRole('button', {
+        name: 'Mobile Application'
+      }).click();
+    }
 
-test('implement user auth', async ({ page }) => {
-  await page.goto('https://create-asana-like-pr-39y5.bolt.host/');
+    await expect(
+      page.getByRole('banner').getByRole('heading', {
+        name: task.application,
+        exact: true
+      })
+    ).toBeVisible();
 
-  await expect(
-    page.getByRole('button', { name: 'Sign in' })
-  ).toBeVisible();
+    // Match the status from JSON while allowing the task count to change.
+    // Tradeoff: regex handles dynamic counts more robustly than hardcoding
+    // a heading such as "To Do (2)", which could change as tasks are added.
 
-  await page.getByRole('textbox', { name: 'Username' }).fill(username);
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
+    // Improvement to Consider: if status names ever contain regex-special characters, 
+    // interpolating them directly could cause unintended matching
+    const statusHeading = page.getByRole('heading', {
+      name: new RegExp(`^${task.status} \\(\\d+\\)$`)
+    });
 
-  await page.getByRole('button', { name: 'Sign in' }).click();
+    await expect(
+      statusHeading,
+      `Expected the "${task.status}" column to be visible.`
+    ).toBeVisible();
 
-  await expect(
-    page.getByRole('banner').getByRole('heading', {
-      name: 'Web Application'
-    })
-  ).toBeVisible();
+    const statusColumn = statusHeading.locator('..');
 
-  // Locate the To Do column by its dynamic heading.
-  const todoHeading = page.getByRole('heading', {
-    name: /^To Do \(\d+\)$/
+    const taskHeading = statusColumn.getByRole('heading', {
+      name: task.title,
+      exact: true
+    });
+
+    await expect(
+      taskHeading,
+      `Expected "${task.title}" to appear in the "${task.status}" column.`
+    ).toBeVisible();
+
+    // Tradeoff: prefer semantic role/name locators over brittle generated selectors;
+    // use parent traversal to scope tag assertions to the task card.
+    const taskCard = taskHeading.locator('..');
+
+    // Data-driven assertions: iterate over the expected tags instead of
+    // duplicating an assertion for each tag; supports any number of tags per task.
+    for (const tag of task.tags) {
+      await expect(
+        taskCard.getByText(tag, { exact: true }),
+        `Expected "${task.title}" to have the "${tag}" tag.`
+      ).toBeVisible();
+    }
   });
-
-  // Fail early if the To Do heading is not visible.
-  await expect(
-    todoHeading,
-    'Expected the To Do column heading to be visible after login.'
-  ).toBeVisible();
-
-  // Find the column container containing the heading and task cards.
-  const todoColumn = todoHeading.locator('..');
-
-  // Locate task heading within the To Do column.
-  const taskHeading = todoColumn.getByRole('heading', {
-    name: 'Implement user authentication',
-    exact: true
-  });
-
-  // Fail if the task card is not found in the To Do column.
-  await expect(
-    taskHeading,
-    'Expected "Implement user authentication" to appear in the To Do column.'
-  ).toBeVisible();
-
-  // Locate task card through DOM traversal. 
-  // (tradeoff analyzed: codegen fragile identifiers vs DOM traversal and strong semantic identifiers)
-  const taskCard = taskHeading.locator('..');
-
-  // removed, determined redundant
-  // await expect(
-  //   taskCard,
-  //   'Expected the task card for "Implement user authentication" to be visible.'
-  // ).toBeVisible();
-
-
-  // TODO: Extract task titles and required tags into test data
-  // so the same verification logic can be reused across all six cases.
-
-  // Fail if 'Feature' tag is not visible inside the To Do task card
-  await expect(
-    taskCard.getByText('Feature', { exact: true }),
-    'Expected the task to have the Feature tag.'
-  ).toBeVisible();
-
-  // Fail if 'High Priority' tag is not visible inside the To Do task card
-  await expect(
-    taskCard.getByText('High Priority', { exact: true }),
-    'Expected the task to have the High Priority tag.'
-  ).toBeVisible();
-
-})
+}
