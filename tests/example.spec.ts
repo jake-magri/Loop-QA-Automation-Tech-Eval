@@ -61,6 +61,7 @@ for (const task of tasks) {
       `Expected the "${task.status}" column to be visible.`
     ).toBeVisible();
 
+    
     const statusColumn = statusHeading.locator('..');
 
     const taskHeading = statusColumn.getByRole('heading', {
